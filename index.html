@@ -1437,6 +1437,221 @@
     .tile:active{ transform:scale(0.95); }
     .garden-seed:active .seed-core{ transform:scale(0.9); }
   }
+
+  /* Cinematic Gift Reveal */
+  .cinematic-gift-reveal{
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    opacity: 1 !important;
+    transition: none !important;
+  }
+
+  .cinematic-fade{
+    position: absolute;
+    inset: 0;
+    background: #000;
+    opacity: 1 !important;
+    transition: none !important;
+  }
+  .cinematic-fade.active{
+    opacity: 1 !important;
+  }
+
+  .cinematic-particles{
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  .cinematic-particle{
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #FFD166;
+    border-radius: 50%;
+    opacity: 0;
+    animation: particleFloat 4s ease-in-out infinite;
+  }
+  @keyframes particleFloat{
+    0%{ opacity: 0; transform: translateY(100vh) scale(0); }
+    50%{ opacity: 1; transform: translateY(50vh) scale(1); }
+    100%{ opacity: 0; transform: translateY(0) scale(0); }
+  }
+
+  .cinematic-gift-box{
+    position: relative;
+    width: 120px;
+    height: 120px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 1s ease, transform 1s ease;
+  }
+  .cinematic-gift-box.visible{
+    opacity: 1;
+    transform: scale(1);
+    animation: breathe 2s ease-in-out infinite;
+  }
+  .cinematic-gift-box.shake{
+    animation: shake 0.1s ease-in-out 30;
+  }
+  @keyframes breathe{
+    0%, 100%{ transform: scale(1); }
+    50%{ transform: scale(1.05); }
+  }
+  @keyframes shake{
+    0%, 100%{ transform: translateX(0) rotate(0); }
+    25%{ transform: translateX(-5px) rotate(-2deg); }
+    75%{ transform: translateX(5px) rotate(2deg); }
+  }
+
+  .gift-box-body{
+    position: absolute;
+    bottom: 0;
+    width: 100px;
+    height: 80px;
+    background: linear-gradient(135deg, #FFD166, #F59E0B);
+    border-radius: 8px;
+    left: 10px;
+    box-shadow: 0 0 30px rgba(255,209,102,0.5);
+  }
+  .gift-box-lid{
+    position: absolute;
+    top: 0;
+    width: 110px;
+    height: 40px;
+    background: linear-gradient(135deg, #FFD166, #F59E0B);
+    border-radius: 8px;
+    left: 5px;
+    transform-origin: bottom;
+    transition: transform 1s ease;
+    box-shadow: 0 0 30px rgba(255,209,102,0.5);
+  }
+  .cinematic-gift-box.opened .gift-box-lid{
+    transform: rotateX(-120deg);
+  }
+  .gift-ribbon-v{
+    position: absolute;
+    width: 10px;
+    height: 100%;
+    background: #111827;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .gift-ribbon-h{
+    position: absolute;
+    height: 10px;
+    width: 100%;
+    background: #111827;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .cinematic-text{
+    position: absolute;
+    color: #FFD166;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 1s ease;
+    max-width: 80%;
+    line-height: 1.6;
+  }
+  .cinematic-text.visible{
+    opacity: 1;
+  }
+
+  .golden-burst{
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(255,209,102,0.8) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+  .golden-burst.active{
+    opacity: 1;
+    animation: burstPulse 1s ease-out;
+  }
+  @keyframes burstPulse{
+    0%{ transform: scale(0); opacity: 1; }
+    100%{ transform: scale(2); opacity: 0; }
+  }
+
+  .gift-reveal-content{
+    text-align: center;
+    color: white;
+    opacity: 0;
+    transition: opacity 1.5s ease;
+  }
+  .gift-reveal-content.visible{
+    opacity: 1 !important;
+  }
+  .gift-icon{
+    font-size: 80px;
+    margin-bottom: 20px;
+  }
+  .gift-title{
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    margin-bottom: 10px;
+    color: #FFD166;
+  }
+  .gift-app-name{
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 48px;
+    margin-bottom: 15px;
+    background: linear-gradient(135deg, #FFD166, #F59E0B);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .gift-description{
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    margin-bottom: 40px;
+    color: rgba(255,255,255,0.8);
+  }
+  .gift-buttons{
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 30px;
+  }
+  .gift-btn{
+    padding: 16px 32px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .gift-btn:hover{
+    transform: scale(1.05);
+  }
+  .gift-btn.primary{
+    background: linear-gradient(135deg, #FFD166, #F59E0B);
+    color: #111827;
+    box-shadow: 0 0 20px rgba(255,209,102,0.5);
+  }
+  .gift-btn.secondary{
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: 2px solid #FFD166;
+  }
+  .gift-message{
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    color: rgba(255,255,255,0.6);
+    max-width: 500px;
+    line-height: 1.6;
+  }
 </style>
 </head>
 <body>
@@ -1454,82 +1669,45 @@
     <button id="btn-full" title="Fullscreen">⤢</button>
   </div>
 
-  <!-- GIFT REVEAL OVERLAY -->
-  <div id="gift-reveal" class="gift-reveal" style="display:none;">
-    <!-- Golden Light Flash -->
-    <div id="golden-flash" class="golden-flash"></div>
+  <!-- CINEMATIC GIFT REVEAL OVERLAY -->
+  <div id="cinematic-gift-reveal" class="cinematic-gift-reveal" style="display:none;">
+    <!-- Fade to black overlay -->
+    <div class="cinematic-fade"></div>
     
-    <!-- Floating Particles -->
-    <div class="floating-particles" id="floating-particles"></div>
+    <!-- Golden particles -->
+    <div class="cinematic-particles" id="cinematic-particles"></div>
     
-    <!-- STEP 1: Gift Opening -->
-    <div id="gift-stage" class="gift-stage" style="display:none;">
-      <div class="gift-box-container">
-        <div class="gift-box" id="gift-box">
-          <div class="gift-box-lid">
-            <div class="gift-ribbon-vertical"></div>
-            <div class="gift-ribbon-horizontal"></div>
-          </div>
-          <div class="gift-box-body">
-            <div class="gift-ribbon-vertical"></div>
-            <div class="gift-ribbon-horizontal"></div>
-            <div class="gift-glow"></div>
-          </div>
-        </div>
+    <!-- Gift box -->
+    <div class="cinematic-gift-box" id="cinematic-gift-box">
+      <div class="gift-box-body">
+        <div class="gift-ribbon-v"></div>
+        <div class="gift-ribbon-h"></div>
+      </div>
+      <div class="gift-box-lid">
+        <div class="gift-ribbon-v"></div>
+        <div class="gift-ribbon-h"></div>
       </div>
     </div>
-
-    <!-- STEP 2: Final Message -->
-    <div id="message-stage" class="message-stage" style="display:none;">
-      <div id="final-message" class="final-message"></div>
-    </div>
-
-    <!-- STEP 3: Gift Reveal Card -->
-    <div id="gift-card-stage" class="gift-card-stage" style="display:none;">
-      <div class="gift-reveal-card" id="gift-reveal-card">
-        <div class="card-header">🎁 Your Gift</div>
-        <div class="card-app-icon">📱</div>
-        <h2 class="card-app-name">Echo</h2>
-        <p class="card-app-description">"Not just an app...<br>A place created especially for you."</p>
+    
+    <!-- Text messages -->
+    <div class="cinematic-text" id="cinematic-text"></div>
+    
+    <!-- Golden light burst -->
+    <div class="golden-burst" id="golden-burst"></div>
+    
+    <!-- Gift reveal content -->
+    <div class="gift-reveal-content" id="gift-reveal-content" style="display:none;">
+      <div class="gift-icon">🎁</div>
+      <h1 class="gift-title">Your Gift is Ready</h1>
+      <h2 class="gift-app-name">Echo</h2>
+      <p class="gift-description">A world made especially for you.</p>
+      
+      <div class="gift-buttons">
+        <button class="gift-btn primary" id="btn-open-echo-cinematic">Open Echo</button>
+        <button class="gift-btn secondary" id="btn-download-echo-cinematic">Download Echo</button>
       </div>
-    </div>
-
-    <!-- STEP 4: Feature Preview -->
-    <div id="feature-stage" class="feature-stage" style="display:none;">
-      <div class="feature-cards-container" id="feature-cards-container"></div>
-    </div>
-
-    <!-- STEP 5: Download Section -->
-    <div id="download-stage" class="download-stage" style="display:none;">
-      <button class="premium-download-btn" id="btn-download-echo">
-        <span class="btn-icon">⬇</span>
-        <span class="btn-text">Download Echo</span>
-        <span class="btn-ripple"></span>
-      </button>
-      <p class="journey-continue">"This journey doesn't end here...<br>It continues inside Echo."</p>
-    </div>
-
-    <!-- STEP 6: Final Thank You -->
-    <div id="final-thank-you" class="final-thank-you" style="display:none;">
-      <div class="stars-container" id="stars-container"></div>
-      <div class="golden-particles" id="golden-particles"></div>
-      <div class="thank-you-content">
-        <div id="thank-you-text" class="thank-you-text"></div>
-      </div>
-    </div>
-
-    <!-- STEP 7: Final Buttons -->
-    <div id="final-buttons-stage" class="final-buttons-stage" style="display:none;">
-      <div class="final-buttons-container">
-        <button class="premium-btn primary-btn" id="btn-open-echo">
-          <span class="btn-icon">✨</span>
-          <span class="btn-text">Open Echo</span>
-        </button>
-        <button class="premium-btn secondary-btn" id="btn-replay-journey">
-          <span class="btn-icon">🔄</span>
-          <span class="btn-text">Replay Journey</span>
-        </button>
-      </div>
+      
+      <p class="gift-message">"Install the app and continue the journey. Everything from this point onward is waiting inside Echo."</p>
     </div>
   </div>
 
@@ -1682,7 +1860,7 @@
       <div class="birthday-content">
         <div class="birthday-emoji">🎉</div>
         <h1 class="birthday-title">Happy Birthday, Monkey! ❤️</h1>
-        <button class="gold-btn birthday-gift-btn" id="btn-unlock-gift-birthday">Unlock Gift</button>
+        <button class="gold-btn birthday-gift-btn" id="btn-unlock-gift-birthday">Unlock</button>
       </div>
     </div>
     
@@ -1698,7 +1876,7 @@
     <div class="headline">One more gift is waiting.</div>
     <div class="sub">Something small, made just for you.</div>
     <button type="button" class="ghost-btn scene-scroll-btn" data-scroll-btn><span class="chev">↓</span> Scroll down</button>
-    <button class="gold-btn" id="btn-unlock-gift" data-scroll-target>Unlock Gift</button>
+    <button class="gold-btn" id="btn-unlock-gift" data-scroll-target onclick="window.cinematicGiftReveal()">Unlock</button>
     <button class="skip-btn" data-skip="landing">Skip → Restart</button>
   </section>
 
@@ -3178,70 +3356,162 @@ el("video-skip").addEventListener("click", () => {
 
 // Unlock gift button handler (birthday screen)
 el("btn-unlock-gift-birthday").addEventListener("click", () => {
-  console.log("Unlock Gift button clicked (birthday screen)");
   AudioSystem.playClick();
   // Stop confetti
   if (celebrationInterval) {
     clearInterval(celebrationInterval);
   }
-  console.log("Starting gift reveal...");
-  console.log("startGiftReveal function exists:", typeof startGiftReveal);
-  try {
-    startGiftReveal();
-  } catch(e) {
-    console.error("Error in startGiftReveal:", e);
-    console.error("Error stack:", e.stack);
+  cinematicGiftReveal();
+});
+
+// Make cinematicGiftReveal globally accessible
+window.cinematicGiftReveal = async function(){
+  const reveal = document.getElementById('cinematic-gift-reveal');
+  const fade = reveal.querySelector('.cinematic-fade');
+  const particles = document.getElementById('cinematic-particles');
+  const giftBox = document.getElementById('cinematic-gift-box');
+  const text = document.getElementById('cinematic-text');
+  const burst = document.getElementById('golden-burst');
+  const content = document.getElementById('gift-reveal-content');
+  
+  // Force overlay to stay visible with inline styles
+  reveal.style.cssText = 'display: flex !important; opacity: 1 !important; visibility: visible !important; position: fixed !important; inset: 0 !important; background: #000 !important; z-index: 999999 !important;';
+  fade.style.cssText = 'opacity: 1 !important; background: #000 !important; position: absolute !important; inset: 0 !important;';
+  
+  // Fade to black
+  fade.classList.add('active');
+  await new Promise(r => setTimeout(r, 2000));
+  
+  // Play unlock sound
+  if(AudioSystem.playUnlock){
+    AudioSystem.playUnlock();
   }
-});
+  
+  // Spawn golden particles
+  for(let i = 0; i < 30; i++){
+    const particle = document.createElement('div');
+    particle.className = 'cinematic-particle';
+    particle.style.left = Math.random() * 100 + '%';
+    particle.style.animationDelay = Math.random() * 4 + 's';
+    particles.appendChild(particle);
+  }
+  
+  // Show gift box with breathing animation
+  giftBox.classList.add('visible');
+  await new Promise(r => setTimeout(r, 1500));
+  
+  // Shake gift box
+  giftBox.classList.add('shake');
+  await new Promise(r => setTimeout(r, 2500));
+  giftBox.classList.remove('shake');
+  
+  // Display text messages
+  const messages = [
+    "One last surprise...",
+    "This wasn't just a website.",
+    "It was only the beginning."
+  ];
+  
+  for(const msg of messages){
+    text.textContent = msg;
+    text.classList.add('visible');
+    await new Promise(r => setTimeout(r, 2000));
+    text.classList.remove('visible');
+    await new Promise(r => setTimeout(r, 500));
+  }
+  
+  // Open gift box
+  giftBox.classList.add('opened');
+  burst.classList.add('active');
+  if(AudioSystem.playConfetti){
+    AudioSystem.playConfetti();
+  }
+  if(typeof fireConfetti === 'function'){
+    fireConfetti();
+  }
+  await new Promise(r => setTimeout(r, 1500));
+  
+  // Hide gift box and show content
+  giftBox.style.display = 'none';
+  content.style.display = 'block';
+  await new Promise(r => setTimeout(r, 100));
+  content.classList.add('visible');
+  
+  // Force overlay to stay visible permanently with inline styles
+  reveal.style.cssText = 'display: flex !important; opacity: 1 !important; visibility: visible !important; position: fixed !important; inset: 0 !important; background: #000 !important; z-index: 999999 !important;';
+  fade.style.cssText = 'opacity: 1 !important; background: #000 !important; position: absolute !important; inset: 0 !important;';
+  content.style.cssText = 'display: block !important; opacity: 1 !important;';
+};
 
-// Download Echo button handler
-el("btn-download-echo").addEventListener("click", () => {
-  AudioSystem.playClick();
-  // Download Vicky Birthday.apk directly
-  const apkDownloadUrl = "/Vicky Birthday.apk";
-  const link = document.createElement("a");
-  link.href = apkDownloadUrl;
-  link.download = "Vicky Birthday.apk";
-  link.style.display = "none";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  
-  // Continue to thank you screen
-  showThankYouScreen();
-});
+// Cinematic button handlers (wrapped in DOMContentLoaded)
+document.addEventListener('DOMContentLoaded', () => {
+  const openEchoBtn = document.getElementById('btn-open-echo-cinematic');
+  if (openEchoBtn) {
+    openEchoBtn.addEventListener('click', () => {
+      AudioSystem.playClick();
+      alert('Please open Echo through your app store or download the APK below.');
+    });
+  }
 
-// Open Echo button handler
-el("btn-open-echo").addEventListener("click", () => {
-  AudioSystem.playClick();
-  // Echo Android app deep link
-  const echoDeepLink = "echo://app";
-  const apkDownloadUrl = "/Vicky Birthday.apk";
-  
-  // Try to open deep link
-  const start = Date.now();
-  window.location.href = echoDeepLink;
-  
-  // Fallback to APK download if app not installed (after 1 second)
-  setTimeout(() => {
-    if (Date.now() - start < 1000){
-      // Create hidden download link
-      const link = document.createElement("a");
+  const downloadEchoBtn = document.getElementById('btn-download-echo-cinematic');
+  if (downloadEchoBtn) {
+    downloadEchoBtn.addEventListener('click', () => {
+      AudioSystem.playClick();
+      const apkDownloadUrl = '/Vicky Birthday.apk';
+      const link = document.createElement('a');
       link.href = apkDownloadUrl;
-      link.download = "Vicky Birthday.apk";
-      link.style.display = "none";
+      link.download = 'Vicky Birthday.apk';
+      link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    }
-  }, 1000);
+      
+      // Show download message for extended time
+      downloadEchoBtn.textContent = 'Downloading...';
+      downloadEchoBtn.disabled = true;
+      
+      setTimeout(() => {
+        downloadEchoBtn.textContent = '✓ Download Complete!';
+        downloadEchoBtn.style.background = 'linear-gradient(135deg, #10B981, #059669)';
+      }, 3000);
+      
+      setTimeout(() => {
+        downloadEchoBtn.textContent = 'Install the APK file from your Downloads folder';
+      }, 5000);
+      
+      setTimeout(() => {
+        downloadEchoBtn.textContent = 'After installing, open Echo from your app drawer';
+      }, 10000);
+      
+      setTimeout(() => {
+        downloadEchoBtn.textContent = 'Enjoy your gift! ❤️';
+      }, 20000);
+      
+      setTimeout(() => {
+        downloadEchoBtn.textContent = 'Happy Birthday, Monkey! 🎉';
+        downloadEchoBtn.style.background = 'linear-gradient(135deg, #FFD166, #F59E0B)';
+        downloadEchoBtn.style.fontSize = '20px';
+      }, 30000);
+      
+      setTimeout(() => {
+        downloadEchoBtn.textContent = 'Happy Birthday! ❤️';
+      }, 40000);
+      
+      setTimeout(() => {
+        downloadEchoBtn.textContent = 'Happy Birthday! 🎂';
+      }, 50000);
+      
+      setTimeout(() => {
+        downloadEchoBtn.textContent = 'Happy Birthday! 🎁';
+      }, 60000);
+      
+      setTimeout(() => {
+        window.close();
+      }, 65000);
+    });
+  }
 });
 
-// Replay Journey button handler
-el("btn-replay-journey").addEventListener("click", () => {
-  AudioSystem.playClick();
-  location.reload();
-});
 
 async function startGiftReveal(){
   const giftReveal = el("gift-reveal");
