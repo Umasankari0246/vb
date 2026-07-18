@@ -3197,26 +3197,44 @@ el("btn-unlock-gift-birthday").addEventListener("click", () => {
 // Download Echo button handler
 el("btn-download-echo").addEventListener("click", () => {
   AudioSystem.playClick();
+  // Download Vicky Birthday.apk directly
+  const apkDownloadUrl = "/Vicky Birthday.apk";
+  const link = document.createElement("a");
+  link.href = apkDownloadUrl;
+  link.download = "Vicky Birthday.apk";
+  link.style.display = "none";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  // Continue to thank you screen
   showThankYouScreen();
 });
 
 // Open Echo button handler
 el("btn-open-echo").addEventListener("click", () => {
   AudioSystem.playClick();
-  // Echo deep link and download URL
+  // Echo Android app deep link
   const echoDeepLink = "echo://app";
-  const echoDownloadUrl = CONFIG.giftLink || "https://apps.apple.com/app/echo/id123456789";
+  const apkDownloadUrl = "/Vicky Birthday.apk";
   
   // Try to open deep link
   const start = Date.now();
   window.location.href = echoDeepLink;
   
-  // Fallback to download if app not installed (after 2.5 seconds)
+  // Fallback to APK download if app not installed (after 1 second)
   setTimeout(() => {
-    if (Date.now() - start < 2000){
-      window.location.href = echoDownloadUrl;
+    if (Date.now() - start < 1000){
+      // Create hidden download link
+      const link = document.createElement("a");
+      link.href = apkDownloadUrl;
+      link.download = "Vicky Birthday.apk";
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
-  }, 2500);
+  }, 1000);
 });
 
 // Replay Journey button handler
