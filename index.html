@@ -755,15 +755,17 @@
     position: fixed;
     inset: 0;
     background: #000;
-    z-index: 1000;
+    z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 0;
     transition: opacity 1s ease;
+    pointer-events: none;
   }
   .gift-reveal.active{
     opacity: 1;
+    pointer-events: auto;
   }
 
   /* Gift Stage */
@@ -1421,7 +1423,7 @@
       <div class="birthday-content">
         <div class="birthday-emoji">🎉</div>
         <h1 class="birthday-title">Happy Birthday, Monkey! ❤️</h1>
-        <button class="gold-btn birthday-gift-btn" id="btn-unlock-gift">Unlock Gift</button>
+        <button class="gold-btn birthday-gift-btn" id="btn-unlock-gift-birthday">Unlock Gift</button>
       </div>
     </div>
     
@@ -2915,9 +2917,9 @@ el("video-skip").addEventListener("click", () => {
   currentVideo.currentTime = currentVideo.duration; // Skip to end
 });
 
-// Unlock gift button handler
-el("btn-unlock-gift").addEventListener("click", () => {
-  console.log("Unlock Gift button clicked");
+// Unlock gift button handler (birthday screen)
+el("btn-unlock-gift-birthday").addEventListener("click", () => {
+  console.log("Unlock Gift button clicked (birthday screen)");
   AudioSystem.playClick();
   // Stop confetti
   if (celebrationInterval) {
@@ -2971,16 +2973,23 @@ async function startGiftReveal(){
   cardStage.style.display = "none";
   finalThankYou.style.display = "none";
   
-  // Fade screen to black over 1 second
+  // Force gift reveal to be visible
   giftReveal.style.display = "flex";
-  console.log("Gift reveal display set to flex");
+  giftReveal.style.opacity = "0";
+  giftReveal.style.pointerEvents = "auto";
+  giftReveal.style.zIndex = "9999";
+  console.log("Gift reveal forced visible, display:", giftReveal.style.display);
+  
+  // Fade screen to black over 1 second
   await new Promise(r => setTimeout(r, 100));
   giftReveal.classList.add("active");
-  console.log("Gift reveal active class added");
+  giftReveal.style.opacity = "1";
+  console.log("Gift reveal active class added, opacity:", giftReveal.style.opacity);
   await new Promise(r => setTimeout(r, 1000));
   
   // Show gift box
   giftStage.style.display = "flex";
+  console.log("Gift stage display set to flex");
   await new Promise(r => setTimeout(r, 500));
   
   // Spawn gift particles
