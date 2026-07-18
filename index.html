@@ -10,7 +10,22 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.2/confetti.browser.min.js"></script>
+<script>
+  // Load canvas-confetti with fallback
+  (function() {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js';
+    script.onload = function() {
+      console.log('Canvas-confetti loaded successfully');
+      window.confettiLoaded = true;
+    };
+    script.onerror = function() {
+      console.warn('Canvas-confetti failed to load, confetti effects will be disabled');
+      window.confettiLoaded = false;
+    };
+    document.head.appendChild(script);
+  })();
+</script>
 
 <style>
   /* ============ DESIGN TOKENS ============ */
@@ -760,33 +775,72 @@
     align-items: center;
     justify-content: center;
     opacity: 0;
-    transition: opacity 1s ease;
+    transition: opacity 1.5s ease, background 2s ease;
     pointer-events: none;
   }
   .gift-reveal.active{
     opacity: 1;
     pointer-events: auto;
   }
+  .gift-reveal.darkened{
+    background: #050505;
+  }
+
+  /* Golden Flash */
+  .golden-flash{
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(255,209,102,0.8), transparent 70%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+  }
+  .golden-flash.active{
+    opacity: 1;
+    animation: flashFade 2s ease forwards;
+  }
+  @keyframes flashFade{
+    0%{ opacity: 1; }
+    30%{ opacity: 0.8; }
+    100%{ opacity: 0; }
+  }
 
   /* Gift Stage */
   .gift-stage{
-    position: relative;
-    width: 100%;
-    height: 100%;
+    position: absolute;
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+  .gift-box-container{
+    position: relative;
   }
   .gift-box{
     position: relative;
     width: 200px;
     height: 200px;
     transform-style: preserve-3d;
-    animation: giftFloat 3s ease-in-out infinite;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 1s ease;
+  }
+  .gift-box.visible{
+    transform: translateY(0);
+    opacity: 1;
+    animation: giftFloat 4s ease-in-out infinite;
   }
   @keyframes giftFloat{
     0%, 100%{ transform: translateY(0) rotateY(0deg); }
-    50%{ transform: translateY(-20px) rotateY(10deg); }
+    50%{ transform: translateY(-15px) rotateY(8deg); }
+  }
+  .gift-box.shake{
+    animation: giftShake 0.6s ease-in-out;
+  }
+  @keyframes giftShake{
+    0%, 100%{ transform: rotate(0deg); }
+    25%{ transform: rotate(-8deg); }
+    75%{ transform: rotate(8deg); }
   }
   .gift-box-body{
     position: absolute;
@@ -808,10 +862,25 @@
     border-radius: 8px;
     box-shadow: 0 10px 30px rgba(255,209,102,0.3);
     transform-origin: bottom center;
-    transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   .gift-box.opened .gift-box-lid{
-    transform: translateX(-50%) rotateX(-120deg);
+    transform: translateX(-50%) rotateX(-140deg);
+  }
+  .gift-glow{
+    position: absolute;
+    inset: -30px;
+    background: radial-gradient(circle, rgba(255,209,102,0.8), transparent 70%);
+    opacity: 0;
+    transition: opacity 1.2s ease;
+  }
+  .gift-box.opened .gift-glow{
+    opacity: 1;
+    animation: glowPulse 2.5s ease-in-out infinite;
+  }
+  @keyframes glowPulse{
+    0%, 100%{ opacity: 0.7; transform: scale(1); }
+    50%{ opacity: 1; transform: scale(1.3); }
   }
   .gift-ribbon-vertical{
     position: absolute;
@@ -829,14 +898,14 @@
     height: 20px;
     background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
   }
-  .gift-particles{
+  .floating-particles{
     position: absolute;
     inset: 0;
     pointer-events: none;
   }
 
-  /* Text Stage */
-  .text-stage{
+  /* Message Stage */
+  .message-stage{
     position: absolute;
     inset: 0;
     display: flex;
@@ -844,51 +913,46 @@
     justify-content: center;
     padding: 40px;
   }
-  .typewriter-text{
+  .final-message{
     font-family: var(--font-serif);
-    font-size: clamp(18px, 3vw, 28px);
+    font-size: clamp(20px, 3.5vw, 32px);
     color: var(--gold);
     text-align: center;
-    line-height: 1.8;
-    max-width: 600px;
-    text-shadow: 0 4px 20px rgba(255,209,102,0.3);
+    line-height: 2;
+    max-width: 700px;
+    text-shadow: 0 4px 30px rgba(255,209,102,0.4);
   }
 
-  /* Card Stage */
-  .card-stage{
+  /* Gift Card Stage */
+  .gift-card-stage{
     position: absolute;
     inset: 0;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 40px;
   }
-  .gift-card{
+  .gift-reveal-card{
     background: rgba(255,255,255,0.1);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,209,102,0.3);
-    border-radius: 20px;
-    padding: 40px;
+    backdrop-filter: blur(40px);
+    border: 2px solid rgba(255,209,102,0.5);
+    border-radius: 28px;
+    padding: 60px 50px;
     text-align: center;
-    max-width: 400px;
-    animation: cardFloat 4s ease-in-out infinite;
-    box-shadow: 0 25px 50px rgba(0,0,0,0.3), 0 0 100px rgba(255,209,102,0.2);
+    max-width: 450px;
+    animation: cardFloat 5s ease-in-out infinite;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 150px rgba(255,209,102,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+    transform: scale(0) translateY(50px);
+    transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .gift-reveal-card.visible{
+    transform: scale(1) translateY(0);
   }
   @keyframes cardFloat{
-    0%, 100%{ transform: translateY(0); }
-    50%{ transform: translateY(-15px); }
+    0%, 100%{ transform: translateY(0) scale(1); }
+    50%{ transform: translateY(-25px) scale(1.02); }
   }
-  .card-icon{
-    font-size: 60px;
-    margin-bottom: 20px;
-    animation: iconBounce 2s ease infinite;
-  }
-  @keyframes iconBounce{
-    0%, 100%{ transform: scale(1); }
-    50%{ transform: scale(1.1); }
-  }
-  .card-title{
+  .card-header{
     font-family: var(--font-ui);
     font-size: 14px;
     letter-spacing: 0.3em;
@@ -896,85 +960,254 @@
     color: var(--gold);
     margin-bottom: 20px;
   }
+  .card-app-icon{
+    font-size: 80px;
+    margin-bottom: 25px;
+    animation: iconBounce 3s ease infinite;
+  }
+  @keyframes iconBounce{
+    0%, 100%{ transform: scale(1) rotate(0deg); }
+    50%{ transform: scale(1.1) rotate(5deg); }
+  }
   .card-app-name{
     font-family: var(--font-serif);
-    font-size: 48px;
+    font-size: 64px;
     color: #fff;
     margin-bottom: 20px;
+    text-shadow: 0 4px 30px rgba(255,209,102,0.4);
   }
-  .card-description{
+  .card-app-description{
     font-family: var(--font-serif);
-    font-size: 18px;
-    color: rgba(255,255,255,0.8);
+    font-size: 20px;
+    color: rgba(255,255,255,0.85);
     line-height: 1.6;
-    margin-bottom: 30px;
-  }
-  .download-btn{
-    font-size: 16px;
-    padding: 16px 32px;
-    margin-bottom: 20px;
-    animation: btnPulse 2s ease infinite;
-  }
-  @keyframes btnPulse{
-    0%, 100%{ transform: scale(1); }
-    50%{ transform: scale(1.05); }
-  }
-  .journey-continue{
-    font-family: var(--font-ui);
-    font-size: 12px;
-    color: rgba(255,255,255,0.5);
-    text-align: center;
-    letter-spacing: 0.1em;
+    font-style: italic;
   }
 
-  /* Final Thank You Screen */
+  /* Feature Stage */
+  .feature-stage{
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+  .feature-cards-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    max-width: 400px;
+  }
+  .feature-card{
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,209,102,0.3);
+    border-radius: 16px;
+    padding: 25px 30px;
+    text-align: center;
+    width: 100%;
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+  }
+  .feature-card.visible{
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  .feature-card-icon{
+    font-size: 36px;
+    margin-bottom: 12px;
+  }
+  .feature-card-title{
+    font-family: var(--font-ui);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .feature-card-desc{
+    font-family: var(--font-serif);
+    font-size: 15px;
+    color: rgba(255,255,255,0.8);
+    font-style: italic;
+  }
+
+  /* Download Stage */
+  .download-stage{
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    gap: 30px;
+  }
+  .premium-download-btn{
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: var(--font-ui);
+    font-size: 20px;
+    font-weight: 600;
+    color: #0f172a;
+    background: linear-gradient(135deg, #FFD166 0%, #FFA500 100%);
+    border: none;
+    border-radius: 50px;
+    padding: 22px 48px;
+    cursor: pointer;
+    overflow: hidden;
+    transform: scale(0);
+    transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 15px 50px rgba(255,209,102,0.5);
+  }
+  .premium-download-btn.visible{
+    transform: scale(1);
+  }
+  .premium-download-btn:hover{
+    transform: scale(1.05);
+    box-shadow: 0 20px 60px rgba(255,209,102,0.7);
+  }
+  .premium-download-btn:active{
+    transform: scale(0.98);
+  }
+  .btn-icon{
+    font-size: 26px;
+  }
+  .btn-text{
+    letter-spacing: 0.05em;
+  }
+  .btn-ripple{
+    position: absolute;
+    inset: 0;
+    border-radius: 50px;
+    background: rgba(255,255,255,0.3);
+    transform: scale(0);
+    opacity: 0;
+    transition: transform 0.6s ease, opacity 0.6s ease;
+  }
+  .premium-download-btn:active .btn-ripple{
+    transform: scale(2);
+    opacity: 1;
+    transition: 0s;
+  }
+
+  /* Final Thank You */
   .final-thank-you{
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%);
+    background: #000;
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  .thank-you-content{
-    text-align: center;
-    animation: fadeInUp 1s ease;
-  }
-  .thank-you-title{
-    font-family: var(--font-serif);
-    font-size: clamp(24px, 4vw, 36px);
-    color: var(--gold);
-    margin-bottom: 20px;
-    text-shadow: 0 4px 20px rgba(255,209,102,0.3);
-  }
-  .thank-you-subtitle{
-    font-family: var(--font-ui);
-    font-size: 18px;
-    color: rgba(255,255,255,0.7);
-    margin-bottom: 30px;
-  }
-  .thank-you-birthday{
-    font-family: var(--font-serif);
-    font-size: clamp(28px, 5vw, 42px);
-    color: #fff;
-    margin-bottom: 40px;
-    font-style: italic;
-  }
-  .thank-you-buttons{
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  .thank-you-btn{
-    font-size: 16px;
-    padding: 16px 32px;
-    min-width: 180px;
-  }
-  .thank-you-particles{
+  .stars-container{
     position: absolute;
     inset: 0;
     pointer-events: none;
+  }
+  .golden-particles{
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .thank-you-content{
+    text-align: center;
+    padding: 40px;
+    max-width: 750px;
+  }
+  .thank-you-text{
+    font-family: var(--font-serif);
+    font-size: clamp(18px, 3vw, 28px);
+    color: #fff;
+    line-height: 2.4;
+    text-shadow: 0 2px 30px rgba(255,209,102,0.3);
+  }
+  .thank-you-text .line{
+    opacity: 0;
+    transform: translateY(25px);
+    transition: all 1s ease;
+  }
+  .thank-you-text .line.visible{
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Final Buttons Stage */
+  .final-buttons-stage{
+    position: absolute;
+    bottom: 80px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    padding: 40px;
+  }
+  .final-buttons-container{
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 1s ease;
+  }
+  .final-buttons-container.visible{
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .premium-btn{
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-ui);
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 50px;
+    padding: 18px 36px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    min-width: 180px;
+  }
+  .primary-btn{
+    background: linear-gradient(135deg, #FFD166 0%, #FFA500 100%);
+    color: #0f172a;
+    box-shadow: 0 10px 40px rgba(255,209,102,0.4);
+  }
+  .primary-btn:hover{
+    transform: translateY(-3px);
+    box-shadow: 0 15px 50px rgba(255,209,102,0.6);
+  }
+  .secondary-btn{
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border: 1px solid rgba(255,209,102,0.4);
+    backdrop-filter: blur(10px);
+  }
+  .secondary-btn:hover{
+    background: rgba(255,255,255,0.15);
+    transform: translateY(-3px);
+  }
+  .journey-continue{
+    font-family: var(--font-serif);
+    font-size: 16px;
+    color: rgba(255,255,255,0.6);
+    text-align: center;
+    font-style: italic;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s ease;
+  }
+  .journey-continue.visible{
+    opacity: 1;
+    transform: translateY(0);
   }
   #final-video-wrap{
     margin-top:26px; width:min(560px,86vw); border-radius:16px; overflow:hidden;
@@ -1122,36 +1355,37 @@
       width: 135px;
       height: 40px;
     }
-    .typewriter-text{
+    .final-message{
       font-size: 16px;
       padding: 20px;
     }
-    .gift-card{
-      padding: 30px 20px;
+    .echo-card{
+      padding: 35px 25px;
       max-width: 320px;
     }
-    .card-icon{
-      font-size: 50px;
+    .echo-icon{
+      font-size: 55px;
     }
-    .card-app-name{
-      font-size: 36px;
+    .echo-title{
+      font-size: 42px;
     }
-    .card-description{
+    .echo-subtitle{
       font-size: 16px;
     }
-    .download-btn{
-      font-size: 14px;
-      padding: 14px 28px;
+    .feature-item{
+      font-size: 13px;
+    }
+    .premium-download-btn{
+      font-size: 16px;
+      padding: 16px 32px;
       min-height: 48px;
     }
-    .thank-you-title{
+    .btn-icon{
       font-size: 20px;
     }
-    .thank-you-subtitle{
+    .thank-you-text{
       font-size: 16px;
-    }
-    .thank-you-birthday{
-      font-size: 24px;
+      padding: 20px;
     }
     .thank-you-buttons{
       flex-direction: column;
@@ -1222,55 +1456,80 @@
 
   <!-- GIFT REVEAL OVERLAY -->
   <div id="gift-reveal" class="gift-reveal" style="display:none;">
-    <!-- Gift Box Stage -->
+    <!-- Golden Light Flash -->
+    <div id="golden-flash" class="golden-flash"></div>
+    
+    <!-- Floating Particles -->
+    <div class="floating-particles" id="floating-particles"></div>
+    
+    <!-- STEP 1: Gift Opening -->
     <div id="gift-stage" class="gift-stage" style="display:none;">
-      <div class="gift-box">
-        <div class="gift-box-lid">
-          <div class="gift-ribbon-vertical"></div>
-          <div class="gift-ribbon-horizontal"></div>
-        </div>
-        <div class="gift-box-body">
-          <div class="gift-ribbon-vertical"></div>
-          <div class="gift-ribbon-horizontal"></div>
+      <div class="gift-box-container">
+        <div class="gift-box" id="gift-box">
+          <div class="gift-box-lid">
+            <div class="gift-ribbon-vertical"></div>
+            <div class="gift-ribbon-horizontal"></div>
+          </div>
+          <div class="gift-box-body">
+            <div class="gift-ribbon-vertical"></div>
+            <div class="gift-ribbon-horizontal"></div>
+            <div class="gift-glow"></div>
+          </div>
         </div>
       </div>
-      <div class="gift-particles" id="gift-particles"></div>
     </div>
 
-    <!-- Typewriter Text Stage -->
-    <div id="text-stage" class="text-stage" style="display:none;">
-      <div id="typewriter-text" class="typewriter-text"></div>
+    <!-- STEP 2: Final Message -->
+    <div id="message-stage" class="message-stage" style="display:none;">
+      <div id="final-message" class="final-message"></div>
     </div>
 
-    <!-- Card Stage -->
-    <div id="card-stage" class="card-stage" style="display:none;">
-      <div class="gift-card">
-        <div class="card-icon">🎁</div>
-        <h2 class="card-title">YOUR GIFT HAS BEEN UNLOCKED</h2>
-        <div class="card-app-name">📱 Echo</div>
-        <p class="card-description">
-          "A place for your thoughts,<br>
-          memories,<br>
-          ideas,<br>
-          and little moments."
-        </p>
+    <!-- STEP 3: Gift Reveal Card -->
+    <div id="gift-card-stage" class="gift-card-stage" style="display:none;">
+      <div class="gift-reveal-card" id="gift-reveal-card">
+        <div class="card-header">🎁 Your Gift</div>
+        <div class="card-app-icon">📱</div>
+        <h2 class="card-app-name">Echo</h2>
+        <p class="card-app-description">"Not just an app...<br>A place created especially for you."</p>
       </div>
-      <button class="gold-btn download-btn" id="btn-download-echo">⬇ Download Echo</button>
-      <p class="journey-continue">The journey doesn't end here...<br>It continues inside Echo.</p>
     </div>
 
-    <!-- Final Thank You Screen -->
+    <!-- STEP 4: Feature Preview -->
+    <div id="feature-stage" class="feature-stage" style="display:none;">
+      <div class="feature-cards-container" id="feature-cards-container"></div>
+    </div>
+
+    <!-- STEP 5: Download Section -->
+    <div id="download-stage" class="download-stage" style="display:none;">
+      <button class="premium-download-btn" id="btn-download-echo">
+        <span class="btn-icon">⬇</span>
+        <span class="btn-text">Download Echo</span>
+        <span class="btn-ripple"></span>
+      </button>
+      <p class="journey-continue">"This journey doesn't end here...<br>It continues inside Echo."</p>
+    </div>
+
+    <!-- STEP 6: Final Thank You -->
     <div id="final-thank-you" class="final-thank-you" style="display:none;">
+      <div class="stars-container" id="stars-container"></div>
+      <div class="golden-particles" id="golden-particles"></div>
       <div class="thank-you-content">
-        <h1 class="thank-you-title">Thank you for taking this journey.</h1>
-        <p class="thank-you-subtitle">I hope it made you smile.</p>
-        <p class="thank-you-birthday">Happy Birthday, Monkey. ❤️</p>
-        <div class="thank-you-buttons">
-          <button class="gold-btn thank-you-btn" id="btn-open-echo">• Open Echo</button>
-          <button class="ghost-btn thank-you-btn" id="btn-replay-journey">• Replay Journey</button>
-        </div>
+        <div id="thank-you-text" class="thank-you-text"></div>
       </div>
-      <div class="thank-you-particles" id="thank-you-particles"></div>
+    </div>
+
+    <!-- STEP 7: Final Buttons -->
+    <div id="final-buttons-stage" class="final-buttons-stage" style="display:none;">
+      <div class="final-buttons-container">
+        <button class="premium-btn primary-btn" id="btn-open-echo">
+          <span class="btn-icon">✨</span>
+          <span class="btn-text">Open Echo</span>
+        </button>
+        <button class="premium-btn secondary-btn" id="btn-replay-journey">
+          <span class="btn-icon">🔄</span>
+          <span class="btn-text">Replay Journey</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -2926,7 +3185,11 @@ el("btn-unlock-gift-birthday").addEventListener("click", () => {
     clearInterval(celebrationInterval);
   }
   console.log("Starting gift reveal...");
-  startGiftReveal();
+  try {
+    startGiftReveal();
+  } catch(e) {
+    console.error("Error in startGiftReveal:", e);
+  }
 });
 
 // Download Echo button handler
@@ -2938,17 +3201,20 @@ el("btn-download-echo").addEventListener("click", () => {
 // Open Echo button handler
 el("btn-open-echo").addEventListener("click", () => {
   AudioSystem.playClick();
-  // Try to open Echo app or redirect to download
-  const echoAppScheme = "echo://";
-  const downloadUrl = CONFIG.giftLink || "#";
+  // Echo deep link and download URL
+  const echoDeepLink = "echo://app";
+  const echoDownloadUrl = CONFIG.giftLink || "https://apps.apple.com/app/echo/id123456789";
   
-  // Try deep link first
-  window.location.href = echoAppScheme;
+  // Try to open deep link
+  const start = Date.now();
+  window.location.href = echoDeepLink;
   
-  // Fallback to download after short delay
+  // Fallback to download if app not installed (after 2.5 seconds)
   setTimeout(() => {
-    window.open(downloadUrl, "_blank");
-  }, 1000);
+    if (Date.now() - start < 2000){
+      window.location.href = echoDownloadUrl;
+    }
+  }, 2500);
 });
 
 // Replay Journey button handler
@@ -2958,92 +3224,184 @@ el("btn-replay-journey").addEventListener("click", () => {
 });
 
 async function startGiftReveal(){
-  console.log("startGiftReveal called");
   const giftReveal = el("gift-reveal");
   const giftStage = el("gift-stage");
-  const textStage = el("text-stage");
-  const cardStage = el("card-stage");
+  const messageStage = el("message-stage");
+  const giftCardStage = el("gift-card-stage");
+  const featureStage = el("feature-stage");
+  const downloadStage = el("download-stage");
   const finalThankYou = el("final-thank-you");
-  
-  console.log("Elements:", { giftReveal, giftStage, textStage, cardStage, finalThankYou });
+  const finalButtonsStage = el("final-buttons-stage");
+  const goldenFlash = el("golden-flash");
   
   // Reset all stages
   giftStage.style.display = "none";
-  textStage.style.display = "none";
-  cardStage.style.display = "none";
+  messageStage.style.display = "none";
+  giftCardStage.style.display = "none";
+  featureStage.style.display = "none";
+  downloadStage.style.display = "none";
   finalThankYou.style.display = "none";
+  finalButtonsStage.style.display = "none";
+  goldenFlash.classList.remove("active");
   
-  // Force gift reveal to be visible
+  // STEP 1: Gift Opening
   giftReveal.style.display = "flex";
-  giftReveal.style.opacity = "0";
-  giftReveal.style.pointerEvents = "auto";
-  giftReveal.style.zIndex = "9999";
-  console.log("Gift reveal forced visible, display:", giftReveal.style.display);
-  
-  // Fade screen to black over 1 second
   await new Promise(r => setTimeout(r, 100));
   giftReveal.classList.add("active");
-  giftReveal.style.opacity = "1";
-  console.log("Gift reveal active class added, opacity:", giftReveal.style.opacity);
-  await new Promise(r => setTimeout(r, 1000));
+  await new Promise(r => setTimeout(r, 1500));
   
-  // Show gift box
+  // Darken background
+  giftReveal.classList.add("darkened");
+  await new Promise(r => setTimeout(r, 800));
+  
+  // Spawn floating particles
+  spawnFloatingParticles();
+  
+  // Show gift box with rise animation
   giftStage.style.display = "flex";
-  console.log("Gift stage display set to flex");
-  await new Promise(r => setTimeout(r, 500));
-  
-  // Spawn gift particles
-  spawnGiftParticles();
-  
-  // Wait 2 seconds then open gift box
-  await new Promise(r => setTimeout(r, 2000));
+  await new Promise(r => setTimeout(r, 100));
   const giftBox = el("gift-box");
+  giftBox.classList.add("visible");
+  await new Promise(r => setTimeout(r, 1500));
+  
+  // Shake gift box
+  giftBox.classList.add("shake");
+  await new Promise(r => setTimeout(r, 600));
+  giftBox.classList.remove("shake");
+  await new Promise(r => setTimeout(r, 300));
+  
+  // Open gift box with golden light
   giftBox.classList.add("opened");
-  
-  // Play magical sound (using existing confetti sound as placeholder)
   AudioSystem.playConfetti();
+  goldenFlash.classList.add("active");
+  firePremiumConfetti(4000);
+  await new Promise(r => setTimeout(r, 2000));
   
-  // Wait for opening animation
-  await new Promise(r => setTimeout(r, 1000));
-  
-  // Hide gift stage and show text stage
+  // STEP 2: Final Message
   giftStage.style.display = "none";
-  textStage.style.display = "flex";
+  messageStage.style.display = "flex";
   
-  // Typewriter animation sequence
-  await typewriterAnimation([
-    "Congratulations...\nYou completed the journey.",
-    "Every puzzle you solved...\nEvery memory you discovered...\nEvery page you explored...\nled you to this moment.",
-    "This wasn't just a birthday website.\n\nIt was a small journey...\nmade especially for you."
+  await cinematicTypewriter([
+    "You completed the journey...",
+    "Every puzzle you solved...",
+    "Every memory you discovered...",
+    "Every smile you created...",
+    "Led you to this moment."
   ]);
   
-  // Show card stage
-  textStage.style.display = "none";
-  cardStage.style.display = "flex";
+  // STEP 3: Gift Reveal Card
+  messageStage.style.display = "none";
+  giftCardStage.style.display = "flex";
+  await new Promise(r => setTimeout(r, 300));
+  
+  const giftRevealCard = el("gift-reveal-card");
+  giftRevealCard.classList.add("visible");
+  await new Promise(r => setTimeout(r, 2000));
+  
+  // STEP 4: Feature Preview
+  giftCardStage.style.display = "none";
+  featureStage.style.display = "flex";
+  
+  await showFeatureCards([
+    { icon: "📝", title: "Notes", desc: "Capture every thought." },
+    { icon: "📸", title: "Memories", desc: "Keep every special moment." },
+    { icon: "📖", title: "Journal", desc: "Write your story." },
+    { icon: "🎮", title: "Mini Games", desc: "Play whenever you're bored." },
+    { icon: "🔒", title: "Secret Vault", desc: "A place only you can unlock." },
+    { icon: "✨", title: "Hidden Surprises", desc: "More secrets are waiting..." }
+  ]);
+  
+  // STEP 5: Download Section
+  featureStage.style.display = "none";
+  downloadStage.style.display = "flex";
+  await new Promise(r => setTimeout(r, 300));
+  
+  const downloadBtn = el("btn-download-echo");
+  downloadBtn.classList.add("visible");
   await new Promise(r => setTimeout(r, 500));
+  
+  const journeyContinue = document.querySelector(".journey-continue");
+  journeyContinue.classList.add("visible");
+}
+
+async function cinematicTypewriter(texts){
+  const finalMessage = el("final-message");
+  
+  for (const text of texts){
+    finalMessage.innerHTML = "";
+    finalMessage.style.opacity = "0";
+    
+    // Fade in
+    gsap.to(finalMessage, { opacity: 1, duration: 0.8 });
+    await new Promise(r => setTimeout(r, 800));
+    
+    // Type text
+    for (const char of text){
+      finalMessage.textContent += char;
+      await new Promise(r => setTimeout(r, 50));
+    }
+    
+    // Pause
+    await new Promise(r => setTimeout(r, 1500));
+    
+    // Fade out
+    gsap.to(finalMessage, { opacity: 0, duration: 0.8, onComplete: () => {
+      finalMessage.textContent = "";
+    }});
+    await new Promise(r => setTimeout(r, 800));
+  }
+}
+
+async function showFeatureCards(features){
+  const container = el("feature-cards-container");
+  container.innerHTML = "";
+  
+  for (const feature of features){
+    const card = document.createElement("div");
+    card.className = "feature-card";
+    card.innerHTML = `
+      <div class="feature-card-icon">${feature.icon}</div>
+      <div class="feature-card-title">${feature.title}</div>
+      <div class="feature-card-desc">${feature.desc}</div>
+    `;
+    container.appendChild(card);
+    
+    // Trigger reflow
+    card.offsetHeight;
+    
+    // Animate card in
+    card.classList.add("visible");
+    
+    // Wait before next card
+    await new Promise(r => setTimeout(r, 1000));
+    
+    // Fade out previous cards
+    card.classList.remove("visible");
+    await new Promise(r => setTimeout(r, 400));
+  }
 }
 
 async function typewriterAnimation(texts){
-  const typewriterText = el("typewriter-text");
+  const finalMessage = el("final-message");
   
   for (const text of texts){
-    typewriterText.innerHTML = "";
+    finalMessage.innerHTML = "";
     const lines = text.split("\n");
     
     for (const line of lines){
       const lineElement = document.createElement("div");
       lineElement.textContent = "";
-      typewriterText.appendChild(lineElement);
+      finalMessage.appendChild(lineElement);
       
       // Type each character
       for (const char of line){
         lineElement.textContent += char;
-        await new Promise(r => setTimeout(r, 50));
+        await new Promise(r => setTimeout(r, 40));
       }
       
       // Add line break
       if (line !== lines[lines.length - 1]){
-        await new Promise(r => setTimeout(r, 300));
+        await new Promise(r => setTimeout(r, 400));
       }
     }
     
@@ -3051,32 +3409,32 @@ async function typewriterAnimation(texts){
     await new Promise(r => setTimeout(r, 2000));
     
     // Fade out current text
-    gsap.to(typewriterText, { opacity: 0, duration: 0.5, onComplete: () => {
-      typewriterText.innerHTML = "";
-      gsap.set(typewriterText, { opacity: 1 });
+    gsap.to(finalMessage, { opacity: 0, duration: 0.6, onComplete: () => {
+      finalMessage.innerHTML = "";
+      gsap.set(finalMessage, { opacity: 1 });
     }});
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise(r => setTimeout(r, 600));
   }
 }
 
-function spawnGiftParticles(){
-  const container = el("gift-particles");
+function spawnFloatingParticles(){
+  const container = el("floating-particles");
   container.innerHTML = "";
   
-  for (let i = 0; i < 50; i++){
+  for (let i = 0; i < 60; i++){
     const particle = document.createElement("div");
-    particle.className = "gift-particle";
+    particle.className = "floating-particle";
     particle.style.cssText = `
       position: absolute;
-      width: ${Math.random() * 6 + 2}px;
-      height: ${Math.random() * 6 + 2}px;
+      width: ${Math.random() * 8 + 3}px;
+      height: ${Math.random() * 8 + 3}px;
       background: ${Math.random() > 0.5 ? "#FFD166" : "#ffffff"};
       border-radius: 50%;
       left: ${Math.random() * 100}%;
       top: ${Math.random() * 100}%;
       opacity: 0;
-      animation: particleFloat ${Math.random() * 3 + 2}s ease-in-out infinite;
-      animation-delay: ${Math.random() * 2}s;
+      animation: particleFloat ${Math.random() * 4 + 3}s ease-in-out infinite;
+      animation-delay: ${Math.random() * 3}s;
     `;
     container.appendChild(particle);
   }
@@ -3088,7 +3446,7 @@ function spawnGiftParticles(){
     style.textContent = `
       @keyframes particleFloat{
         0%, 100%{ opacity: 0; transform: translateY(0) scale(0); }
-        50%{ opacity: 1; transform: translateY(-50px) scale(1); }
+        50%{ opacity: 1; transform: translateY(-60px) scale(1); }
       }
     `;
     document.head.appendChild(style);
@@ -3096,63 +3454,142 @@ function spawnGiftParticles(){
 }
 
 async function showThankYouScreen(){
-  const cardStage = el("card-stage");
+  const downloadStage = el("download-stage");
   const finalThankYou = el("final-thank-you");
+  const finalButtonsStage = el("final-buttons-stage");
   
-  // Hide card stage
-  cardStage.style.display = "none";
+  // Hide download stage
+  downloadStage.style.display = "none";
   
   // Show thank you screen
   finalThankYou.style.display = "flex";
   
-  // Spawn thank you particles
-  spawnThankYouParticles();
+  // Spawn stars and golden particles
+  spawnStars();
+  spawnGoldenParticles();
   
-  // Start celebration confetti
-  fireConfetti();
+  // Start premium celebration confetti
+  firePremiumConfetti(5000);
   
-  // Continuous confetti for a few seconds
-  const confettiInterval = setInterval(() => {
-    if (typeof confetti === "function") {
-      try {
-        confetti({ particleCount: 8, spread:60, origin:{y:0.7}, colors:["#FFD166","#ffffff","#111827"] });
-      } catch(e) {
-        console.warn("Confetti error:", e);
-      }
-    }
-  }, 300);
+  // Line-by-line text animation
+  const thankYouText = el("thank-you-text");
+  thankYouText.innerHTML = "";
   
-  setTimeout(() => clearInterval(confettiInterval), 5000);
+  const lines = [
+    "Thank you...",
+    "",
+    "For taking this journey.",
+    "",
+    "I hope every page,",
+    "every puzzle,",
+    "every memory,",
+    "made you smile.",
+    "",
+    "Happy Birthday,",
+    "Monkey ❤️"
+  ];
+  
+  for (let i = 0; i < lines.length; i++){
+    const lineElement = document.createElement("div");
+    lineElement.className = "line";
+    lineElement.textContent = lines[i];
+    thankYouText.appendChild(lineElement);
+    
+    // Trigger reflow
+    lineElement.offsetHeight;
+    
+    // Animate line in
+    lineElement.classList.add("visible");
+    
+    // Wait before next line
+    await new Promise(r => setTimeout(r, lines[i] === "" ? 400 : 800));
+  }
+  
+  // Show final buttons
+  await new Promise(r => setTimeout(r, 2000));
+  finalButtonsStage.style.display = "flex";
+  await new Promise(r => setTimeout(r, 300));
+  
+  const finalButtonsContainer = document.querySelector(".final-buttons-container");
+  finalButtonsContainer.classList.add("visible");
 }
 
-function spawnThankYouParticles(){
-  const container = el("thank-you-particles");
+function spawnStars(){
+  const container = el("stars-container");
   container.innerHTML = "";
   
-  for (let i = 0; i < 30; i++){
+  for (let i = 0; i < 50; i++){
+    const star = document.createElement("div");
+    star.className = "star";
+    star.style.cssText = `
+      position: absolute;
+      width: ${Math.random() * 3 + 1}px;
+      height: ${Math.random() * 3 + 1}px;
+      background: #fff;
+      border-radius: 50%;
+      left: ${Math.random() * 100}%;
+      top: ${Math.random() * 100}%;
+      opacity: ${Math.random() * 0.5 + 0.2};
+      animation: twinkle ${Math.random() * 3 + 2}s ease-in-out infinite;
+      animation-delay: ${Math.random() * 2}s;
+    `;
+    container.appendChild(star);
+  }
+  
+  // Add twinkle animation if not exists
+  if (!document.getElementById("star-styles")){
+    const style = document.createElement("style");
+    style.id = "star-styles";
+    style.textContent = `
+      @keyframes twinkle{
+        0%, 100%{ opacity: 0.2; transform: scale(1); }
+        50%{ opacity: 1; transform: scale(1.5); }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+}
+
+function spawnGoldenParticles(){
+  const container = el("golden-particles");
+  container.innerHTML = "";
+  
+  for (let i = 0; i < 40; i++){
     const particle = document.createElement("div");
-    particle.className = "thank-you-particle";
+    particle.className = "golden-particle";
     particle.style.cssText = `
       position: absolute;
-      width: ${Math.random() * 8 + 4}px;
-      height: ${Math.random() * 8 + 4}px;
+      width: ${Math.random() * 6 + 2}px;
+      height: ${Math.random() * 6 + 2}px;
       background: ${Math.random() > 0.5 ? "#FFD166" : "#ffffff"};
       border-radius: 50%;
       left: ${Math.random() * 100}%;
       top: ${Math.random() * 100}%;
       opacity: 0;
-      animation: particleFloat ${Math.random() * 4 + 3}s ease-in-out infinite;
+      animation: goldenFloat ${Math.random() * 4 + 3}s ease-in-out infinite;
       animation-delay: ${Math.random() * 3}s;
     `;
     container.appendChild(particle);
+  }
+  
+  // Add golden float animation if not exists
+  if (!document.getElementById("golden-particle-styles")){
+    const style = document.createElement("style");
+    style.id = "golden-particle-styles";
+    style.textContent = `
+      @keyframes goldenFloat{
+        0%, 100%{ opacity: 0; transform: translateY(0) scale(0); }
+        50%{ opacity: 1; transform: translateY(-80px) scale(1); }
+      }
+    `;
+    document.head.appendChild(style);
   }
 }
 
 function fireConfetti(){
   AudioSystem.playConfetti();
-  if (typeof confetti !== "function") {
-    console.warn("Confetti library not loaded, skipping confetti effects");
-    return;
+  if (!window.confettiLoaded || typeof confetti !== "function") {
+    return; // Silent fallback
   }
   const duration = 2600;
   const end = Date.now() + duration;
@@ -3161,15 +3598,84 @@ function fireConfetti(){
       confetti({ particleCount: 4, angle:60, spread:70, origin:{x:0}, colors:["#FFD166","#ffffff","#111827"] });
       confetti({ particleCount: 4, angle:120, spread:70, origin:{x:1}, colors:["#FFD166","#ffffff","#111827"] });
     } catch(e) {
-      console.warn("Confetti error:", e);
+      // Silent error handling
     }
     if (Date.now() < end) requestAnimationFrame(frame);
   })();
   try {
     confetti({ particleCount:120, spread:100, origin:{y:0.6}, colors:["#FFD166","#ffffff"] });
   } catch(e) {
-    console.warn("Confetti error:", e);
+    // Silent error handling
   }
+}
+
+// Premium confetti celebration for gift reveal
+function firePremiumConfetti(duration = 5000){
+  if (!window.confettiLoaded || typeof confetti !== "function") {
+    return; // Silent fallback
+  }
+  
+  const end = Date.now() + duration;
+  const colors = ["#FFD166", "#ffffff", "#FFA500", "#FFD700", "#FFF8DC"];
+  
+  // Continuous confetti from both sides
+  (function frame(){
+    const timeLeft = end - Date.now();
+    if (timeLeft <= 0) return;
+    
+    // Left side burst
+    confetti({
+      particleCount: Math.floor(Math.random() * 3) + 2,
+      angle: 60,
+      spread: 70,
+      origin: { x: 0 },
+      colors: colors,
+      scalar: Math.random() * 0.5 + 0.8
+    });
+    
+    // Right side burst
+    confetti({
+      particleCount: Math.floor(Math.random() * 3) + 2,
+      angle: 120,
+      spread: 70,
+      origin: { x: 1 },
+      colors: colors,
+      scalar: Math.random() * 0.5 + 0.8
+    });
+    
+    requestAnimationFrame(frame);
+  })();
+  
+  // Center burst after 500ms
+  setTimeout(() => {
+    if (window.confettiLoaded && typeof confetti === "function") {
+      confetti({
+        particleCount: 150,
+        spread: 120,
+        origin: { y: 0.6 },
+        colors: colors,
+        scalar: 1.2
+      });
+    }
+  }, 500);
+  
+  // Additional bursts at intervals
+  const burstInterval = setInterval(() => {
+    if (Date.now() > end || !window.confettiLoaded || typeof confetti !== "function") {
+      clearInterval(burstInterval);
+      return;
+    }
+    
+    confetti({
+      particleCount: 50,
+      spread: 90,
+      origin: { 
+        x: Math.random() * 0.4 + 0.3,
+        y: Math.random() * 0.3 + 0.4
+      },
+      colors: colors
+    });
+  }, 800);
 }
 el("btn-to-gift").addEventListener("click", ()=> { AudioSystem.playClick(); goTo("gift"); });
 
